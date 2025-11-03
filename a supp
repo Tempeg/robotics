@@ -1,35 +1,59 @@
-for k = 2:T
-    clf; hold on; axis([xmin xmax ymin ymax]); axis square;
+for k=2:T
+    clf(); 
+    hold on;
+    axis([xmin xmax ymin ymax]); 
+    axis square;
 
-    % attractive gradient
-    grad_Uattr = 2 * alpha * (X_state(:,k-1) - p_goal);
+    % Gradient computation
 
-    % repulsive gradient
-    d = norm(X_state(:,k-1) - p_obs);
-    if d < R_obs + 1
-        grad_Urep = beta * (1/d - 1/(R_obs+1)) * (1/d^3) * (X_state(:,k-1) - p_obs);
-    else
-        grad_Urep = [0;0];
-    end
+    % Artificial attractive potential
+    % gradient of the attractive potential function Eq.(2)
+    grad_Uattr=[0;0]; % TO DO
+    grad_Uattr(1) = 2 * alpha * (X_state(1)-p_goal(1));
 
-    % total gradient
-    grad_U = grad_Uattr + grad_Urep;
+    grad_Uattr(2) = 2 * alpha * (X_state(2)-p_goal(2));
 
-    % reference velocity
-    ref_vel_vec = -grad_U;
+    % Artificial repulsive potential
+    % gradient of the repulsive potential function
+    grad_Urep=[0;0]; % TO DO
+    grad_Urep(1) = beta * (X_state(1)-p_goal(1)) / ((X_state(1)-p_goal(1))^2/3 + (X_state(2)-p_goal(2))^2/3);
+    grad_Urep(2) =  beta * (X_state(1)-p_goal(1)) / ((X_state(2)-p_goal(2))^2/3 + (X_state(2)-p_goal(2))^2/3);
 
-    % control input
-    u(:,k-1) = ref_vel_vec;
+    % Better defined repulsive potential - Q2.6
 
-    % dynamics (simple integrator)
-    f = robot_dynamics(X_state(:,k-1), u(:,k-1), 'integrator');
-    X_state(:,k) = X_state(:,k-1) + f * dt;
+    % ponderation parameters
+    alpha=1;
+    beta=1;
+    
+    % total gradient 
+    grad_U=[0;0]; % TO DO
+    grad_U(1) = (grad_Uattr(1) - grad_Urep(1));
+    grad_U(2) = (grad_Uattr(2) - grad_Urep(2));
 
-    % draw (si fonctions disponibles)
-    % draw_field(p_obs, [], p_goal, alpha, beta, limits);
 
-    plot(X_state(1,k-1), X_state(2,k-1), 'or', 'LineWidth', 3);
-    plot(p_goal(1), p_goal(2), 'og', 'LineWidth', 3);
-    plot(p_obs(1), p_obs(2), 'ok', 'LineWidth', 3);
-    drawnow;
+    % reference velocity vector 
+    ref_vel_vec=[0;0]; % TO DO
+    ref_vel_vec(1) = - grad_U(1);
+    ref_vel_vec(2) = - grad_U(2);
+
+    %control law
+    u(:,k-1)=[0;0]; % TO DO
+    u(1) = ref_vel_vec(1) ;
+    u(2) = ref_vel_vec(2) ;
+        
+    % robot state update using its dynamics
+    % X_dot=f(X_state,u)
+    f=robot_dynamics(X_state(:,k-1),u(:,k-1),'integrator');
+    X_state(:,k)=[0;0]; % TO DO
+    X_state(k) = X_state(k-1) + f(X_state(k-1),u(k-1))*dt;
+
+    % draw the potential field
+    draw_field(p_obs,p_obs2,p_goal,alpha,beta,limits);
+    % draw the robot
+    plot(X_state(1,k-1),X_state(2,k-1),'ored','LineWidth',3);
+    % draw the goal position
+    plot(p_goal(1),p_goal(2),'ogreen','LineWidth',4);
+    % draw the obstacle position
+    plot(p_obs(1),p_obs(2),'oblack','LineWidth',4);
+    drawnow();
 end
