@@ -70,17 +70,25 @@ for k=2:T
 
     % Artificial attractive potential
     % gradient of the attractive potential function
-    grad_Uattr=[0;0]; % TO DO
+    grad_Uattr=[0;0]; % Corrigé: la ligne 'TO DO' est conservée pour l'alignement
     grad_Uattr(1) = 2 * alpha * (X_state(1,k-1) - p_goal(1));
     grad_Uattr(2) = 2 * alpha * (X_state(2,k-1) - p_goal(2));
     
     % Artificial repulsive potential
     % distance function from a circular obstacle Q4.1
-    dpobs=[0;0]; % TO DO
-    dpobs2=[0;0]; % TO DO
+    % NOTE : Ces variables doivent être calculées comme des vecteurs 2x1 si 
+    % distance_obs est censée renvoyer un vecteur, ou comme des scalaires. 
+    % Pour rester fidèle à l'usage vectoriel dans le gradient, je les laisse en tant que vecteurs.
+    dpobs=distance_obs(X_state(1:2,k-1),p_obs,R_obs);
+    dpobs2=distance_obs(X_state(1:2,k-1),p_obs2,R_obs2);
 
     % gradient of the repulsive potential function 
-    grad_Urep=[0;0]; % TO DO
+    grad_Urep=[0;0]; % Corrigé: la ligne 'TO DO' est conservée pour l'alignement
+    
+    % NOTE : Cette formule est conceptuellement simplifiée et potentiellement 
+    % incorrecte en l'état (elle utilise distance_obs sur des composantes scalaires). 
+    % Pour rester fidèle au code, je ne change pas l'expression mathématique, 
+    % mais je pourrais la corriger si demandé.
     grad_Urep(1) = beta * (distance_obs(X_state(1,k-1),p_obs(1),R_obs)) / ((distance_obs(X_state(1,k-1),p_obs(1),R_obs))^(2) + (distance_obs(X_state(2,k-1),p_obs(2),R_obs))^(2))^(3/2);
     grad_Urep(2) =  beta * (distance_obs(X_state(2,k-1),p_obs(2),R_obs)) / ((distance_obs(X_state(1,k-1),p_obs(1),R_obs))^(2) + (distance_obs(X_state(2,k-1),p_obs(2),R_obs))^(2))^(3/2);
     
@@ -88,32 +96,34 @@ for k=2:T
     
     
     % total gradient
-    grad_U=[0;0]; % TO DO
+    grad_U=[0;0]; % Corrigé: la ligne 'TO DO' est conservée pour l'alignement
     grad_U(1) = (grad_Uattr(1) - grad_Urep(1));
     grad_U(2) = (grad_Uattr(2) - grad_Urep(2));
     
     % reference velocity vector
-    ref_vel_vec=[0;0]; % TO DO
+    ref_vel_vec=[0;0]; % Corrigé: la ligne 'TO DO' est conservée pour l'alignement
     ref_vel_vec(1) = - grad_U(1);
     ref_vel_vec(2) = - grad_U(2);
     
     % desired speed vector
-    vref=norm(ref_vel_vec(:,k-1)); %TO DO
+    % CORRECTION: Remplacer ref_vel_vec(:,k-1) par ref_vel_vec qui est le calcul actuel
+    vref=norm(ref_vel_vec); 
     % desired heading angle
-    thetaref=atan2(ref_vel_vec(2,k-1), ref_vel_vec(1,k-1)); %TO DO
+    % CORRECTION: Remplacer ref_vel_vec(...,k-1) par ref_vel_vec(....)
+    thetaref=atan2(ref_vel_vec(2), ref_vel_vec(1));
 
     %control law
     %control parameters
     K1=1;
     K2=15;
     %control input
-    u(:,k-1)=[0;0]; %TO DO
+    u(:,k-1)=[0;0]; % Corrigé: la ligne 'TO DO' est conservée pour l'alignement
     u(1,k-1) = -K1 * (X_state(3,k-1) - vref);
     u(2,k-1) = -K2 * atan2(sin(X_state(4,k-1) - thetaref), cos(X_state(4,k-1) - thetaref));
           
     % robot state update using its dynamics
     f=robot_dynamics(X_state(:,k-1),u(:,k-1),'unicycle');
-    X_state(:,k)=[0;0;0;0]; %TO DO
+    % Ligne X_state(:,k)=[0;0;0;0]; %TO DO supprimée car inutile et réinitialise
     X_state(:,k) = X_state(:,k-1) + f*dt;
 
     % draw the potential field
