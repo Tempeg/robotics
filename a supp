@@ -1,3 +1,63 @@
+%---------- Computer lab Autonomous Systems ----------
+%-------------- Master MARS - 3A ASI -----------------
+%--------------- Lara BRINON ARRANZ ------------------
+
+%------------------ STUDENTS FILE --------------------
+
+%% Navigation with artificial potential fields - simple integrator robot
+
+% robot model
+% p_robot = [x;y]
+% simple integrator dynamics
+% p_dot = [u1;u2]
+
+% space state X_state = p = [x;y]
+% X_dot = [u1;u2]
+
+% parameters for the figures
+init;
+xmin=0;
+xmax=10;
+ymin=0;
+ymax=10;
+limits=[xmin, xmax, ymin, ymax];
+
+% simulation parameters
+% sampling time
+dt=0.01;
+% number of iterations
+T=300;
+
+% robot variables
+% robot state initial conditions
+X_state=zeros(2,T);
+% robot control input u
+u=zeros(2,T);
+
+% initial conditions (k=1)
+X_state(:,1)=[2;1];
+
+% scenario
+% GOAL
+% position of the goal
+p_goal=[6;6];
+
+% OBSTACLES
+% position of obstacle 1
+p_obs=[4;4];
+% radius of obstacle 1 : if R_obs=0 the obstacle is a point with no dimensions
+R_obs=0;
+% position of obstacle 2
+p_obs2=p_obs; % p_obs2=p_obs means that there is only one obstacle and not two at the same location
+% radius of obstacle 2 : if R_obs2=0 the obstacle is a point with no dimensions
+R_obs2=0;
+
+% ponderation parameters
+alpha=1;
+beta=1;
+
+
+% simulation
 for k=2:T
     clf(); 
     hold on;
@@ -53,3 +113,26 @@ for k=2:T
     plot(p_obs(1),p_obs(2),'oblack','LineWidth',4);
     drawnow();
 end
+
+%% Figure
+figure 
+% draw field
+draw_field(p_obs,p_obs2,p_goal,alpha,beta,limits);
+hold on
+axis([xmin xmax ymin ymax]); 
+axis square;
+
+% SCENARIO
+% plot the goal position
+plot(p_goal(1),p_goal(2),'ogreen','LineWidth',4);
+% plot the obstacle(s) position(s)
+plot(p_obs(1),p_obs(2),'oblack','LineWidth',3);
+
+% ROBOT
+% plot the robot's initial state
+plot(X_state(1,1),X_state(2,1),'ored','LineWidth',3);
+% plot the robot's trajectory
+plot(X_state(1,:),X_state(2,:),'red','LineWidth',1);
+% plot the robot's final state
+plot(X_state(1,T),X_state(2,T),'ored','LineWidth',3);
+
