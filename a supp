@@ -1,3 +1,4 @@
+
 %---------- Computer lab Autonomous Systems ----------
 %-------------- Master MARS - 3A ASI -----------------
 %--------------- Lara BRINON ARRANZ ------------------
@@ -44,7 +45,7 @@ p_goal=[6;6];
 
 % OBSTACLES
 % position of obstacle 1
-p_obs=[4;4];
+p_obs=[5;5];
 % radius of obstacle 1 : if R_obs=0 the obstacle is a point with no dimensions
 R_obs=0;
 % position of obstacle 2
@@ -135,4 +136,3 @@ plot(X_state(1,1),X_state(2,1),'ored','LineWidth',3);
 plot(X_state(1,:),X_state(2,:),'red','LineWidth',1);
 % plot the robot's final state
 plot(X_state(1,T),X_state(2,T),'ored','LineWidth',3);
-
