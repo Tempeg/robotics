@@ -1,0 +1,35 @@
+for k = 2:T
+    clf; hold on; axis([xmin xmax ymin ymax]); axis square;
+
+    % attractive gradient
+    grad_Uattr = 2 * alpha * (X_state(:,k-1) - p_goal);
+
+    % repulsive gradient
+    d = norm(X_state(:,k-1) - p_obs);
+    if d < R_obs + 1
+        grad_Urep = beta * (1/d - 1/(R_obs+1)) * (1/d^3) * (X_state(:,k-1) - p_obs);
+    else
+        grad_Urep = [0;0];
+    end
+
+    % total gradient
+    grad_U = grad_Uattr + grad_Urep;
+
+    % reference velocity
+    ref_vel_vec = -grad_U;
+
+    % control input
+    u(:,k-1) = ref_vel_vec;
+
+    % dynamics (simple integrator)
+    f = robot_dynamics(X_state(:,k-1), u(:,k-1), 'integrator');
+    X_state(:,k) = X_state(:,k-1) + f * dt;
+
+    % draw (si fonctions disponibles)
+    % draw_field(p_obs, [], p_goal, alpha, beta, limits);
+
+    plot(X_state(1,k-1), X_state(2,k-1), 'or', 'LineWidth', 3);
+    plot(p_goal(1), p_goal(2), 'og', 'LineWidth', 3);
+    plot(p_obs(1), p_obs(2), 'ok', 'LineWidth', 3);
+    drawnow;
+end
