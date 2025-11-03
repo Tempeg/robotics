@@ -1,0 +1,152 @@
+%---------- Computer lab Autonomous Systems ----------
+%-------------- Master MARS - 3A ASI -----------------
+%--------------- Lara BRINON ARRANZ ------------------
+
+%------------------ STUDENTS FILE --------------------
+
+%% Navigation with artificial potential fields - non-holonomic robot
+
+% robot model
+% p = [x;y]
+% theta = heading angle
+% v = speed vector
+% unicycle car model
+% p_dot = [v*cos(theta);v*sin(theta)]
+% v_dot = u1
+% theta_dot = u2
+% define X_state = [x;y;v;theta]
+% X_dot = [v*cos(theta);v*sin(theta);u1;u2]
+
+% parameters for the figures
+init;
+xmin=0;
+xmax=8;
+ymin=0;
+ymax=8;
+limits=[xmin, xmax, ymin, ymax];
+
+% simulation parameters
+% sampling time
+dt=0.01;
+% number of iterations
+T=300;
+
+% robot variables
+% robot state X_state
+X_state=zeros(4,T);
+% robot control input u
+u=zeros(2,T);
+
+% initial conditions (k=1)
+X_state(:,1)=[2;1;1;pi/4];
+
+% scenario
+% GOAL
+% position of the goal
+p_goal=[6;6];
+
+% OBSTACLES
+% position of obstacle 1
+p_obs=[4;4];
+% radius of obstacle 1 : if R_obs=0 the obstacle is a point with no dimensions
+R_obs=0;
+% position of obstacle 2
+p_obs2=p_obs; % p_obs2=p_obs means that there is only one obstacle and not two at the same location
+% radius of obstacle 2 : if R_obs2=0 the obstacle is a point with no dimensions
+R_obs2=0;
+
+% ponderation parameters
+alpha=1;
+beta=1;
+
+% simulation
+for k=2:T
+    clf(); 
+    hold on;
+    axis([xmin xmax ymin ymax]); 
+    axis square;
+
+    % Gradient computation
+
+    % Artificial attractive potential
+    % gradient of the attractive potential function
+    grad_Uattr=[0;0]; % TO DO
+    grad_Uattr(1) = 2 * alpha * (X_state(1,k-1) - p_goal(1));
+    grad_Uattr(2) = 2 * alpha * (X_state(2,k-1) - p_goal(2));
+    
+    % Artificial repulsive potential
+    % distance function from a circular obstacle Q4.1
+    dpobs=[0;0]; % TO DO
+    dpobs2=[0;0]; % TO DO
+
+    % gradient of the repulsive potential function 
+    grad_Urep=[0;0]; % TO DO
+    grad_Urep(1) = beta * (distance_obs(X_state(1,k-1),p_obs(1),R_obs)) / ((distance_obs(X_state(1,k-1),p_obs(1),R_obs))^(2) + (distance_obs(X_state(2,k-1),p_obs(2),R_obs))^(2))^(3/2);
+    grad_Urep(2) =  beta * (distance_obs(X_state(2,k-1),p_obs(2),R_obs)) / ((distance_obs(X_state(1,k-1),p_obs(1),R_obs))^(2) + (distance_obs(X_state(2,k-1),p_obs(2),R_obs))^(2))^(3/2);
+    
+    % Better defined repulsive potential Q4.4
+    
+    
+    % total gradient
+    grad_U=[0;0]; % TO DO
+    grad_U(1) = (grad_Uattr(1) - grad_Urep(1));
+    grad_U(2) = (grad_Uattr(2) - grad_Urep(2));
+    
+    % reference velocity vector
+    ref_vel_vec=[0;0]; % TO DO
+    ref_vel_vec(1) = - grad_U(1);
+    ref_vel_vec(2) = - grad_U(2);
+    
+    % desired speed vector
+    vref=norm(ref_vel_vec(:,k-1)); %TO DO
+    % desired heading angle
+    thetaref=atan2(ref_vel_vec(2,k-1), ref_vel_vec(1,k-1)); %TO DO
+
+    %control law
+    %control parameters
+    K1=1;
+    K2=15;
+    %control input
+    u(:,k-1)=[0;0]; %TO DO
+    u(1,k-1) = -K1 * (X_state(3,k-1) - vref);
+    u(2,k-1) = -K2 * atan2(sin(X_state(4,k-1) - thetaref), cos(X_state(4,k-1) - thetaref));
+          
+    % robot state update using its dynamics
+    f=robot_dynamics(X_state(:,k-1),u(:,k-1),'unicycle');
+    X_state(:,k)=[0;0;0;0]; %TO DO
+    X_state(:,k) = X_state(:,k-1) + f*dt;
+
+    % draw the potential field
+    draw_field(p_obs,p_obs2,p_goal,alpha,beta,limits);
+    % draw the robot
+    draw_robot(X_state([1,2,4],k-1),'red',0.1);
+    %plot(x(1,k),x(2,k),'ored','LineWidth',3);
+    % draw the goal position
+    plot(p_goal(1),p_goal(2),'ogreen','LineWidth',4);
+    % draw the obstacle position
+    draw_circular_obstacle(p_obs,R_obs);
+    draw_circular_obstacle(p_obs2,R_obs2);
+    drawnow();
+end
+
+%% Figures
+figure 
+draw_field(p_obs,p_obs2,p_goal,alpha,beta,limits);
+hold on
+axis([xmin xmax ymin ymax]); 
+axis square;
+
+% SCENARIO
+% plot the goal position
+plot(p_goal(1),p_goal(2),'ogreen','LineWidth',4);
+% plot the obstacle(s) position(s)
+draw_circular_obstacle(p_obs,R_obs);
+draw_circular_obstacle(p_obs2,R_obs2);
+
+% ROBOT
+% plot the robot's initial state
+draw_robot(X_state([1,2,4],1),'red',0.1);
+% plot the robot's trajectory
+plot(X_state(1,:),X_state(2,:),'red','LineWidth',1);
+%plot the robot's final state
+draw_robot(X_state([1,2,4],T),'red',0.1);
